@@ -73,14 +73,86 @@ $ mau deploy
 
 ## Insertar la tabla de datos estado (Porque tiene relacion con tarea)
 
-* INSERT INTO public."Estado"
+## Creacion de tablas 
+### Yo use la creacion el schema de primas para generar el modelo y pueda crearce la base de datos.
+
+#### Creación Schema de primas 
+```Shell
+model Estado {
+  id                  String      @id @default(uuid())
+  nombre              String      @unique
+  descripcion         String?
+  fecha_Creacion      DateTime    @default(now())
+  fecha_Actualizacion DateTime    @updatedAt
+  tareas              Tarea[]
+}
+
+
+model Tarea {
+  id                  String      @id @default(uuid())
+  nombre              String      @unique
+  descripcion         String?
+  fechaCreacion       DateTime    @default(now())
+  fecha_Actualizacion DateTime?   @updatedAt
+  fecha_Vencimiento   DateTime?   @updatedAt
+  estadoId            String?
+  estado              Estado?     @relation(fields: [estadoId], references: [id], onDelete: Cascade)
+  role                Role        @default(USER)
+}
+
+
+enum Role {
+USER
+ADMIN
+}
+```
+#### Tambien puedes usar el esquema de prisma hacelo por script sql 
+```Shell
+-- public."Estado" definition
+
+-- Drop table
+
+-- DROP TABLE public."Estado";
+
+CREATE TABLE public."Estado" (
+	id text NOT NULL,
+	nombre text NOT NULL,
+	descripcion text NULL,
+	"fecha_Creacion" timestamp(3) DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	"fecha_Actualizacion" timestamp(3) NOT NULL,
+	CONSTRAINT "Estado_pkey" PRIMARY KEY (id)
+);
+CREATE UNIQUE INDEX "Estado_nombre_key" ON public."Estado" USING btree (nombre);
+
+
+
+CREATE TABLE public."Tarea" (
+	id text NOT NULL,
+	nombre text NOT NULL,
+	descripcion text NULL,
+	"fechaCreacion" timestamp(3) DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	"fecha_Actualizacion" timestamp(3) NULL,
+	"fecha_Vencimiento" timestamp(3) NULL,
+	"estadoId" text NULL,
+	"role" public."Role" DEFAULT 'USER'::"Role" NOT NULL,
+	CONSTRAINT "Tarea_pkey" PRIMARY KEY (id)
+);
+CREATE UNIQUE INDEX "Tarea_nombre_key" ON public."Tarea" USING btree (nombre);
+
+
+-- public."Tarea" foreign keys
+
+ALTER TABLE public."Tarea" ADD CONSTRAINT "Tarea_estadoId_fkey" FOREIGN KEY ("estadoId") REFERENCES public."Estado"(id) ON DELETE CASCADE ON UPDATE CASCADE;
+```
+```Shell
+INSERT INTO public."Estado"
 (id, nombre, descripcion, "fecha_Creacion", "fecha_Actualizacion")
 VALUES('51a71bf9-9e1a-4545-82cd-7d1ec84f0ef3', 'Pendiente', 'Tarea aún no iniciada', '2025-07-30 12:50:57.351', '2025-07-30 12:50:57.351');
 
-* INSERT INTO public."Estado"
+INSERT INTO public."Estado"
 (id, nombre, descripcion, "fecha_Creacion", "fecha_Actualizacion")
 VALUES('06c14ce7-c926-4ddb-8bd3-f08989a84803', 'En Progreso', 'Tarea en desarrollo', '2025-07-30 12:50:57.367', '2025-07-30 12:50:57.367');
-
+```
 ## Pruebas Unitarias 
 login
 ![asdfg](./imagen/1.png)
