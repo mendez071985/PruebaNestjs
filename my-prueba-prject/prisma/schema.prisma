@@ -1,0 +1,43 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output = "../../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Estado {
+  id                  String      @id @default(uuid())
+  nombre              String      @unique
+  descripcion         String?
+  fecha_Creacion      DateTime    @default(now())
+  fecha_Actualizacion DateTime    @updatedAt
+  tareas              Tarea[]
+}
+
+
+model Tarea {
+  id                  String      @id @default(uuid())
+  nombre              String      @unique
+  descripcion         String?
+  fechaCreacion       DateTime    @default(now())
+  fecha_Actualizacion DateTime?   @updatedAt
+  fecha_Vencimiento   DateTime?   @updatedAt
+  estadoId            String?
+  estado              Estado?     @relation(fields: [estadoId], references: [id], onDelete: Cascade)
+  role                Role        @default(USER)
+}
+
+
+enum Role {
+USER
+ADMIN
+}
